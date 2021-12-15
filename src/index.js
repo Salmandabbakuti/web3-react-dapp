@@ -5,13 +5,9 @@ import './index.css';
 import App from './App';
 import { ethers } from 'ethers';
 
-function getLibrary(provider) {
-  return new ethers.providers.Web3Provider(provider)
-}
-
 ReactDOM.render(
   <React.StrictMode>
-    <Web3ReactProvider getLibrary={getLibrary}>
+    <Web3ReactProvider getLibrary={(provider) => new ethers.providers.Web3Provider(provider)}>
       <App />
     </Web3ReactProvider>
   </React.StrictMode>,

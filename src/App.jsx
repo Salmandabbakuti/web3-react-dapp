@@ -5,7 +5,7 @@ import './App.css';
 import { useEffect, useState } from "react";
 
 const injected = new InjectedConnector({
-  supportedChainIds: [1, 3, 4, 5, 42],
+  supportedChainIds: [1, 3, 4, 5, 42, 80001],
 })
 
 const abi = [{ "inputs": [{ "internalType": "string", "name": "_greeting", "type": "string" }], "stateMutability": "nonpayable", "type": "constructor" }, { "inputs": [], "name": "getGreeting", "outputs": [{ "internalType": "string", "name": "", "type": "string" }], "stateMutability": "view", "type": "function" }, { "inputs": [{ "internalType": "string", "name": "_greeting", "type": "string" }], "name": "setGreeting", "outputs": [], "stateMutability": "nonpayable", "type": "function" }];
@@ -31,6 +31,26 @@ function App() {
       const contract = new Contract('0x7D18927e96099Ca0C68B9c445744D64A11964D9C', abi, signer);
       setContract(contract);
       contract.getGreeting().then((greeting) => setGreeting(greeting));
+    } else if (active && chainId !== 3) {
+      // switching network
+      library.provider.request({
+        method: "wallet_switchEthereumChain",
+        params: [
+          {
+            chainId: "0x3",
+          }
+        ]
+      }).catch((err) => {
+        // add polygon mumbai network to metamask if not already added
+        if (err.code === 4902) {
+          library.provider.request({
+            method: 'wallet_addEthereumChain',
+            params: [{ chainName: 'Polygon Mumbai', chainId: '0x13881', rpcUrls: ['https://rpc-mumbai.maticvigil.com/'] }]
+          }).catch((err) => error(err.message));
+        } else {
+          console.error(err.message);
+        }
+      });
     } else {
       console.log("No injected web3 provider found or not connected to ropsten testnet");
     }
